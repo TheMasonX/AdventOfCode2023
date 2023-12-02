@@ -1,0 +1,28 @@
+name: Rust
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+  
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build day_01
+      run: cargo build --verbose --manifest-path ./day_01/Cargo.toml
+    - name: Run tests  day_01
+      run: cargo test --verbose --manifest-path ./day_01/Cargo.toml
+
+    - name: Build day_02
+      run: cargo build --verbose --manifest-path ./day_02/Cargo.toml
+    - name: Run tests  day_02
+      run: cargo test --verbose --manifest-path ./day_02/Cargo.toml
