@@ -1,14 +1,18 @@
 use std::fs;
 
 fn main() {
-    let input_file = "C:/Users/TheMasonX/Documents/Rust/AdventOfCode2023/day_01/input.txt";
-    let input_text = match fs::read_to_string(input_file) {
+    let input_file = format!(
+        "{}/input.txt",
+        std::env::current_dir().unwrap().to_str().unwrap()
+    );
+    let input_text = match fs::read_to_string(&input_file) {
         Ok(ok) => ok,
         Err(e) => {
             println!("Couldn't open file {}: {:?}", input_file, e);
             return;
         }
     };
+
     let mut first_total: i32 = 0;
     let mut second_total: i32 = 0;
     println!("{} Lines", input_text.lines().count());
