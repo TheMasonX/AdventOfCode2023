@@ -193,9 +193,9 @@ mod tests {
         assert_eq!(
             set.colors,
             vec![
+                ColorCount::new(Red, 3),
                 ColorCount::new(Green, 9),
                 ColorCount::new(Blue, 4),
-                ColorCount::new(Red, 3)
             ]
         );
     }
