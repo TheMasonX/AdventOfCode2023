@@ -54,22 +54,24 @@ impl Schematic {
                     _ => symbols.push(Symbol { symbol: *c, pos }),
                 }
 
-                if !part_num_chars.is_empty() {
-                    let num_string = part_num_chars.iter().collect::<String>();
-                    part_num_chars.clear();
-                    if let Ok(num) = num_string.parse::<i32>() {
-                        // println!("Parsed int {}", num);
-                        let len = num_string.len() as i32;
-                        parts.push(PartNumber {
-                            number: num,
-                            pos: Vec2 {
-                                x: x as i32 - len,
-                                y: y as i32,
-                            },
-                            length: len,
-                            near_symbol: false,
-                        })
-                    }
+                if part_num_chars.is_empty() {
+                    continue;
+                }
+
+                let num_string = part_num_chars.iter().collect::<String>();
+                part_num_chars.clear();
+                if let Ok(num) = num_string.parse::<i32>() {
+                    // println!("Parsed int {}", num);
+                    let len = num_string.len() as i32;
+                    parts.push(PartNumber {
+                        number: num,
+                        pos: Vec2 {
+                            x: x as i32 - len,
+                            y: y as i32,
+                        },
+                        length: len,
+                        near_symbol: false,
+                    })
                 }
             }
             grid_y.push(chars);
@@ -110,11 +112,7 @@ impl Schematic {
 
             let count = nearby.len();
             if count == 2 {
-                gears.push(Gear {
-                    pos: g.pos,
-                    part_a: *nearby[0],
-                    part_b: *nearby[1],
-                })
+                gears.push(Gear::new(g.pos, *nearby[0], *nearby[1]));
             }
         }
         gears
@@ -138,27 +136,13 @@ impl Schematic {
 
     pub fn search_for_symbols(&mut self, parts: &mut [PartNumber]) {
         for part in parts.iter_mut() {
-            for s in self.symbols.iter() {
-                // println!("Symbol {:?} Part{:?}", s.pos, part.pos);
-                // println!(
-                //     "left {} | right {} | top {} | bottom {}",
-                //     left, right, top, bottom
-                // );
-                if self.is_within_bounds(s.pos, part.pos, part.length) {
-                    part.near_symbol = true;
-                    // println!("{} was near symbol {}", part.number, s.symbol);
-                    break;
-                }
-            }
-
-            let val = self
+            if self
                 .symbols
                 .iter()
-                .filter(|s| self.is_within_bounds(s.pos, part.pos, part.length))
-                .map(|s| s.symbol)
-                .collect::<Vec<char>>();
-
-            part.near_symbol = !val.is_empty();
+                .any(|s| self.is_within_bounds(s.pos, part.pos, part.length))
+            {
+                part.near_symbol = true;
+            }
         }
         self.parts = parts.to_vec();
     }
