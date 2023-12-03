@@ -1,7 +1,7 @@
 [package]
-name = "day_04"
+name = "day_05"
 authors = ["TheMasonX"]
-description = "Advent of Code 2023 Day 04"
+description = "Advent of Code 2023 Day 05"
 license = "MIT"
 version = "0.1.0"
 edition = "2021"
