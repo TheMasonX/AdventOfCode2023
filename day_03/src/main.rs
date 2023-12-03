@@ -1,4 +1,5 @@
 use array2d::Array2D;
+use derive_new::new;
 // use itertools::Itertools;
 use std::cmp::{max, min};
 use tmx_utils::string_ext;
@@ -11,8 +12,10 @@ fn main() {
         schematic.grid.num_columns(),
         schematic.grid.num_rows()
     );
-    let outcome = schematic.get_total();
-    println!("First Solution {}", outcome);
+    let first_outcome = schematic.get_parts_total();
+    println!("First Solution {}", first_outcome);
+    let second_outcome = schematic.get_gears_total();
+    println!("Second Solution {}", second_outcome);
 }
 
 #[derive(Debug, Clone)]
@@ -82,7 +85,7 @@ impl Schematic {
         schematic
     }
 
-    pub fn get_total(&self) -> i32 {
+    pub fn get_parts_total(&self) -> i32 {
         self.parts
             .iter()
             .filter_map(|p| match p.near_symbol {
@@ -92,21 +95,56 @@ impl Schematic {
             .sum()
     }
 
+    pub fn get_gears(&self) -> Vec<Gear> {
+        let mut gears = Vec::new();
+
+        let potential_gears: Vec<&Symbol> =
+            self.symbols.iter().filter(|s| s.symbol == '*').collect();
+
+        for g in potential_gears.iter() {
+            let nearby: Vec<&PartNumber> = self
+                .parts
+                .iter()
+                .filter(|p| self.is_within_bounds(g.pos, p.pos, p.length))
+                .collect();
+
+            let count = nearby.len();
+            if count == 2 {
+                gears.push(Gear {
+                    pos: g.pos,
+                    part_a: *nearby[0],
+                    part_b: *nearby[1],
+                })
+            }
+        }
+        gears
+    }
+
+    pub fn get_gears_total(&self) -> i32 {
+        self.get_gears()
+            .iter()
+            .map(|g| g.part_a.number * g.part_b.number)
+            .sum()
+    }
+
+    fn is_within_bounds(&self, pos_other: Vec2, pos_self: Vec2, length: i32) -> bool {
+        let left = max(pos_self.x - 1, 0);
+        let right = min(pos_self.x + length, self.grid.num_columns() as i32);
+        let top = max(pos_self.y - 1, 0);
+        let bottom = min(pos_self.y + 1, self.grid.num_rows() as i32);
+
+        pos_other.x >= left && pos_other.x <= right && pos_other.y >= top && pos_other.y <= bottom
+    }
+
     pub fn search_for_symbols(&mut self, parts: &mut [PartNumber]) {
         for part in parts.iter_mut() {
-            let pos = part.pos;
-            let left = max(pos.x - 1, 0);
-            let right = min(pos.x + part.length, self.grid.num_columns() as i32);
-            let top = max(pos.y - 1, 0);
-            let bottom = min(pos.y + 1, self.grid.num_rows() as i32);
-
             for s in self.symbols.iter() {
                 // println!("Symbol {:?} Part{:?}", s.pos, part.pos);
                 // println!(
                 //     "left {} | right {} | top {} | bottom {}",
                 //     left, right, top, bottom
                 // );
-                if s.pos.x >= left && s.pos.x <= right && s.pos.y >= top && s.pos.y <= bottom {
+                if self.is_within_bounds(s.pos, part.pos, part.length) {
                     part.near_symbol = true;
                     // println!("{} was near symbol {}", part.number, s.symbol);
                     break;
@@ -116,9 +154,7 @@ impl Schematic {
             let val = self
                 .symbols
                 .iter()
-                .filter(|s| {
-                    s.pos.x >= left && s.pos.x <= right && s.pos.y >= top && s.pos.y <= bottom
-                })
+                .filter(|s| self.is_within_bounds(s.pos, part.pos, part.length))
                 .map(|s| s.symbol)
                 .collect::<Vec<char>>();
 
@@ -145,7 +181,7 @@ impl Schematic {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, new, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Vec2 {
     pub x: i32,
     pub y: i32,
@@ -163,6 +199,13 @@ pub struct PartNumber {
 pub struct Symbol {
     symbol: char,
     pos: Vec2,
+}
+
+#[derive(Debug, Clone, new)]
+pub struct Gear {
+    pos: Vec2,
+    part_a: PartNumber,
+    part_b: PartNumber,
 }
 
 #[cfg(test)]
@@ -208,7 +251,7 @@ mod tests {
             assert_eq!(expected_parts[i].1, part.near_symbol);
         }
 
-        let outcome = schematic.get_total();
+        let outcome = schematic.get_parts_total();
 
         let expected_outcome: i32 = expected_parts
             .iter()
@@ -217,6 +260,43 @@ mod tests {
                 _ => 0,
             })
             .sum();
+        assert_eq!(expected_outcome, outcome);
+    }
+
+    #[test]
+    fn test_b() {
+        let input_text = "467..114..
+        ...*......
+        ..35..633.
+        ......#...
+        617*......
+        .....+.58.
+        ..592.....
+        ......755.
+        ...$.*....
+        .664.598..";
+
+        let expected_gears = [(Vec2::new(3, 1), 16345), (Vec2::new(5, 8), 451490)];
+
+        let schematic = Schematic::new(input_text);
+        schematic.print();
+
+        let gears = schematic.get_gears();
+        println!("Found {} gears", gears.len());
+
+        for (gear, expected) in gears.iter().zip(expected_gears.iter()) {
+            println!(
+                "Gear at {:?} has value {} | Expected {}",
+                gear.pos,
+                gear.part_a.number * gear.part_b.number,
+                expected.1
+            );
+            assert_eq!(gear.pos, expected.0);
+            assert_eq!(gear.part_a.number * gear.part_b.number, expected.1);
+        }
+
+        let outcome = schematic.get_gears_total();
+        let expected_outcome: i32 = expected_gears.iter().map(|f| f.1).sum();
         assert_eq!(expected_outcome, outcome);
     }
 }
