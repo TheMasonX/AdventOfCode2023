@@ -1,17 +1,7 @@
-use std::fs;
+use tmx_utils::string_ext;
 
 fn main() {
-    let input_file = format!(
-        "{}/input.txt",
-        std::env::current_dir().unwrap().to_str().unwrap()
-    );
-    let input_text = match fs::read_to_string(&input_file) {
-        Ok(ok) => ok,
-        Err(e) => {
-            println!("Couldn't open file {}: {:?}", input_file, e);
-            return;
-        }
-    };
+    let input_text = string_ext::read_local_file("input.txt").unwrap();
 
     let mut first_total: i32 = 0;
     let mut second_total: i32 = 0;
