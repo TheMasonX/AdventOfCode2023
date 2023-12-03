@@ -1,4 +1,6 @@
+use derive_new::new;
 use regex::Regex;
+use smart_default::SmartDefault;
 use std::collections::HashMap;
 use tmx_utils::string_ext;
 use Color::*;
@@ -24,42 +26,36 @@ fn main() {
     println!("Ouput: {} | Power: {}", output, power_output);
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, SmartDefault)]
 pub struct Game {
+    #[default(-1)]
     id: i32,
+    #[default(Vec::new())]
     sets: Vec<Set>,
     min_set: Set,
 }
 
 impl Game {
     pub fn new(input: &str) -> Game {
-        let mut new_game = Game {
-            id: -1,
-            sets: Vec::new(),
-            min_set: Set::default(),
-        };
-
+        let mut new_game = Game::default();
         let after_header = new_game.strip_header(input);
         new_game.parse_sets(after_header);
-
         new_game
     }
 
     fn strip_header<'a>(&mut self, input: &'a str) -> &'a str {
-        let re = Regex::new(r"Game (?<id>\d+):").unwrap();
-        let Some(caps) = re.captures(input) else {
-            return input;
+        let re = Regex::new(r"Game (?<id>\d+): ").unwrap();
+        let captures = match re.captures(input) {
+            Some(caps) => caps,
+            None => return input,
         };
-        self.id = caps["id"].parse::<i32>().unwrap_or(-1);
-        let find: usize = input.find(':').unwrap();
-        &input[find + 1..]
+        self.id = captures["id"].parse::<i32>().unwrap_or(-1);
+        &input[captures.get(0).unwrap().end()..] // return the rest of the text
     }
 
     fn parse_sets(&mut self, input: &str) {
-        let set_strings = input.split(';');
-        for set_string in set_strings {
-            self.add_set(Set::new(set_string));
-        }
+        let mut sets: Vec<Set> = input.split(';').map(Set::new).collect();
+        self.sets.append(&mut sets);
         self.min_set.create_min_set(&self.sets);
     }
 
@@ -79,52 +75,27 @@ pub struct Set {
 
 impl Set {
     pub fn new(input: &str) -> Set {
-        let mut new_set = Set { colors: Vec::new() };
+        let mut new_set = Set::default();
 
         let color_strings: Vec<&str> = input.trim().split(',').collect();
         for color_string in color_strings {
-            let kvp: Vec<&str> = color_string.trim().split(' ').collect();
-            let int = match kvp.first().unwrap().trim().parse() {
-                Ok(ok) => ok,
-                Err(e) => {
-                    println!("Error parsing {} into int: {:?}", color_string, e);
-                    continue;
-                }
-            };
-            let color_name = kvp.last().unwrap().trim();
-            let color = match color_name {
-                "red" => ColorCount::new(Red, int),
-                "green" => ColorCount::new(Green, int),
-                "blue" => ColorCount::new(Blue, int),
-                _ => {
-                    println!("Error parsing {} into '# Color'", color_string);
-                    continue;
-                }
-            };
-            new_set.colors.push(color);
+            new_set.parse_color(color_string);
         }
         new_set.colors.sort();
         new_set
     }
 
     pub fn validate(&self, given_set: &Set) -> bool {
-        for color in &self.colors {
-            for other_color in &given_set.colors {
-                if !color.validate(other_color) {
-                    return false;
-                }
-            }
-        }
-        true
+        let validate = |other| self.colors.iter().any(|c| !c.validate(other));
+        !given_set.colors.iter().any(validate)
     }
 
     pub fn get_power(&self) -> i32 {
-        let mut power = 1;
-        let _ = self.colors.iter().map(|c| power *= c.count).count();
+        let power: i32 = self.colors.iter().map(|c| c.count).product();
         power
     }
 
-    pub fn create_min_set(&mut self, sets: &Vec<Set>) {
+    fn create_min_set(&mut self, sets: &Vec<Set>) {
         let mut counts: HashMap<Color, i32> = HashMap::new();
         for set in sets {
             for color in &set.colors {
@@ -142,24 +113,46 @@ impl Set {
             .collect();
         self.colors.sort();
     }
+
+    fn parse_color(&mut self, color_string: &str) {
+        let kvp: Vec<&str> = color_string.trim().split(' ').collect();
+        let int = match kvp.first().unwrap().trim().parse() {
+            Ok(ok) => ok,
+            Err(e) => {
+                println!("Error parsing {} into int: {:?}", color_string, e);
+                return;
+            }
+        };
+        let color_name = kvp.last().unwrap().trim();
+        self.colors.push(ColorCount::from_string(color_name, int));
+    }
 }
 
-#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Debug, Eq, Ord, PartialEq, PartialOrd, new)]
 pub struct ColorCount {
     color: Color,
     count: i32,
 }
 
 impl ColorCount {
-    pub fn new(color: Color, count: i32) -> ColorCount {
-        ColorCount { color, count }
+    /// Create a new ColorCount from a string
+    ///
+    /// # Panics
+    /// If the string is not a valid color ()
+    pub fn from_string(color: &str, count: i32) -> ColorCount {
+        ColorCount::new(
+            match color {
+                "red" => Red,
+                "green" => Green,
+                "blue" => Blue,
+                _ => panic!("{} is not a valid color", color),
+            },
+            count,
+        )
     }
 
     pub fn validate(&self, other: &ColorCount) -> bool {
-        if other.color != self.color {
-            return true;
-        }
-        self.count <= other.count
+        other.color != self.color || self.count <= other.count
     }
 }
 
@@ -206,6 +199,7 @@ mod tests {
                 ],
             },
         };
+
         expected_game.add_set(Set::new("1 green, 4 blue"));
         expected_game.add_set(Set::new("1 blue, 2 green, 1 red"));
         expected_game.add_set(Set::new("1 red, 1 green, 2 blue"));
@@ -246,11 +240,12 @@ mod tests {
         let games: Vec<Game> = input.lines().map(Game::new).collect();
 
         let mut output = 0;
-        for game in games {
-            if game.validate(&given_set) {
+        games
+            .iter()
+            .filter(|game| game.validate(&given_set))
+            .for_each(|game| {
                 output += game.id;
-            }
-        }
+            });
         assert_eq!(expected_output, output);
     }
 
@@ -281,8 +276,9 @@ mod tests {
         izip!(games, min_sets, powers).for_each(|(game, min_set, power)| {
             // println!("{}: {:?} should be {:?}", game.id, game.min_set, min_set);
             assert_eq!(game.min_set, min_set);
+
             let calc_power = game.min_set.get_power();
-            println!("{}: {} should be {}", game.id, calc_power, power);
+            // println!("{}: {} should be {}", game.id, calc_power, power);
             assert_eq!(calc_power, power);
 
             total_power += calc_power;
