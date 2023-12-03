@@ -26,3 +26,8 @@ jobs:
       run: cargo build --verbose --manifest-path ./day_02/Cargo.toml
     - name: Run tests  day_02
       run: cargo test --verbose --manifest-path ./day_02/Cargo.toml
+
+    - name: Build day_03
+      run: cargo build --verbose --manifest-path ./day_03/Cargo.toml
+    - name: Run tests  day_03
+      run: cargo test --verbose --manifest-path ./day_03/Cargo.toml
