@@ -14,3 +14,9 @@ regex = "1.10.2"
 tmx_utils = "0.1.2"
 derive-new = "0.6.0"
 smart-default = "0.7.1"
+
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = 3
+strip = true

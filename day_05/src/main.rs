@@ -1,33 +1,12 @@
+use day_05::Almanac;
 use tmx_utils::string_ext;
 
 fn main() {
     let input_text = string_ext::read_local_file("input.txt").unwrap();
 
-    println!("First Solution: {}", 0);
-    println!("Second Solution: {}", 0);
-}
-
-#[derive(Debug)]
-pub struct StructA {}
-
-impl StructA {
-    pub fn new(input: &str) -> Self {
-        Self {}
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_a() {
-        let input_text = "";
-        let expected = 0;
-        let mut actual = 0;
-
-        let s = StructA::new(input_text);
-
-        assert_eq!(expected, actual);
-    }
+    let mut almanac = Almanac::new(&input_text);
+    let first = *almanac.seeds_to_soil().iter().min().unwrap();
+    println!("First Solution: {}", first);
+    let second = almanac.seed_ranges_to_soil();
+    println!("Second Solution: {}", second);
 }
