@@ -1,7 +1,7 @@
 [package]
-name = "day_04"
+name = "day_06"
 authors = ["TheMasonX"]
-description = "Advent of Code 2023 Day 04"
+description = "Advent of Code 2023 Day 06"
 license = "MIT"
 version = "0.1.0"
 edition = "2021"
@@ -12,3 +12,5 @@ edition = "2021"
 itertools = "0.12.0"
 regex = "1.10.2"
 tmx_utils = "0.1.2"
+derive-new = "0.6.0"
+smart-default = "0.7.1"
