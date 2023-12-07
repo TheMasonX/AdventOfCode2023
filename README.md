@@ -6,12 +6,12 @@ I was inspired by [Low Level Learning's video](https://www.youtube.com/watch?v=O
 
 Day | Star 1 | Star2
 :-- | :----: | :----:
-01  | :star: | :star: 
-02  | :star: | :star: 
+01  | :star: | :star:
+02  | :star: | :star:
 03  | :star: | :star:
 04  | :star: | :star:
 05  | :star: | :star:
-06  |        |  
+06  | :star: | :star:
 07  |        |  
 08  |        |  
 09  |        |  

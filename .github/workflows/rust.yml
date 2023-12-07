@@ -35,3 +35,68 @@ jobs:
       run: cargo build --verbose --manifest-path ./day_04/Cargo.toml
     - name: Run tests  day_04
       run: cargo test --verbose --manifest-path ./day_04/Cargo.toml
+
+    - name: Build day_05
+      run: cargo build --verbose --manifest-path ./day_05/Cargo.toml
+    - name: Run tests  day_05
+      run: cargo test --verbose --manifest-path ./day_05/Cargo.toml
+
+    - name: Build day_06
+      run: cargo build --verbose --manifest-path ./day_06/Cargo.toml
+    - name: Run tests  day_06
+      run: cargo test --verbose --manifest-path ./day_06/Cargo.toml
+
+    # - name: Build day_07
+    #   run: cargo build --verbose --manifest-path ./day_07/Cargo.toml
+    # - name: Run tests  day_07
+    #   run: cargo test --verbose --manifest-path ./day_07/Cargo.toml
+
+    # - name: Build day_08
+    #   run: cargo build --verbose --manifest-path ./day_08/Cargo.toml
+    # - name: Run tests  day_08
+    #   run: cargo test --verbose --manifest-path ./day_08/Cargo.toml
+
+    # - name: Build day_09
+    #   run: cargo build --verbose --manifest-path ./day_09/Cargo.toml
+    # - name: Run tests  day_09
+    #   run: cargo test --verbose --manifest-path ./day_09/Cargo.toml
+
+    # - name: Build day_10
+    #   run: cargo build --verbose --manifest-path ./day_10/Cargo.toml
+    # - name: Run tests  day_10
+    #   run: cargo test --verbose --manifest-path ./day_10/Cargo.toml
+
+    # - name: Build day_11
+    #   run: cargo build --verbose --manifest-path ./day_11/Cargo.toml
+    # - name: Run tests  day_11
+    #   run: cargo test --verbose --manifest-path ./day_11/Cargo.toml
+
+    # - name: Build day_12
+    #   run: cargo build --verbose --manifest-path ./day_12/Cargo.toml
+    # - name: Run tests  day_12
+    #   run: cargo test --verbose --manifest-path ./day_12/Cargo.toml
+
+    # - name: Build day_13
+    #   run: cargo build --verbose --manifest-path ./day_13/Cargo.toml
+    # - name: Run tests  day_13
+    #   run: cargo test --verbose --manifest-path ./day_13/Cargo.toml
+
+    # - name: Build day_14
+    #   run: cargo build --verbose --manifest-path ./day_14/Cargo.toml
+    # - name: Run tests  day_14
+    #   run: cargo test --verbose --manifest-path ./day_14/Cargo.toml
+
+    # - name: Build day_15
+    #   run: cargo build --verbose --manifest-path ./day_15/Cargo.toml
+    # - name: Run tests  day_15
+    #   run: cargo test --verbose --manifest-path ./day_15/Cargo.toml
+
+    # - name: Build day_16
+    #   run: cargo build --verbose --manifest-path ./day_16/Cargo.toml
+    # - name: Run tests  day_16
+    #   run: cargo test --verbose --manifest-path ./day_16/Cargo.toml
+    
+    # - name: Build day_17
+    #   run: cargo build --verbose --manifest-path ./day_17/Cargo.toml
+    # - name: Run tests  day_17
+    #   run: cargo test --verbose --manifest-path ./day_17/Cargo.toml
