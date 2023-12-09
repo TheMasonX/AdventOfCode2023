@@ -12,7 +12,7 @@ Day | Star 1 | Star2
 04  | :star: | :star:
 05  | :star: | :star:
 06  | :star: | :star:
-07  |        |  
+07  | :star: |  
 08  |        |  
 09  |        |  
 10  |        |  
