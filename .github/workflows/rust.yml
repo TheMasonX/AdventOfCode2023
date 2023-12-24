@@ -51,10 +51,10 @@ jobs:
     - name: Run tests  day_07
       run: cargo test --verbose --manifest-path ./day_07/Cargo.toml
 
-    # - name: Build day_08
-    #   run: cargo build --verbose --manifest-path ./day_08/Cargo.toml
-    # - name: Run tests  day_08
-    #   run: cargo test --verbose --manifest-path ./day_08/Cargo.toml
+    - name: Build day_08
+      run: cargo build --verbose --manifest-path ./day_08/Cargo.toml
+    - name: Run tests  day_08
+      run: cargo test --verbose --manifest-path ./day_08/Cargo.toml
 
     # - name: Build day_09
     #   run: cargo build --verbose --manifest-path ./day_09/Cargo.toml
