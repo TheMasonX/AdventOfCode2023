@@ -1,22 +1,37 @@
-use derive_new::new;
 use itertools::{multizip as zip, Itertools};
-use regex::{Captures, RegexBuilder};
+use num::integer;
+use regex::RegexBuilder;
 use std::collections::HashMap;
 
 #[derive(Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Element {
-    Start,
+    Start(String),
     Middle(String),
-    End,
+    End(String),
 }
 
 impl Element {
     pub fn new(input: &str) -> Option<Self> {
         match input {
-            "AAA" => Some(Self::Start),
-            "ZZZ" => Some(Self::End),
+            a if a.ends_with('A') => Some(Self::Start(input.to_string())),
+            z if z.ends_with('Z') => Some(Self::End(input.to_string())),
             _ => Some(Self::Middle(input.to_string())),
         }
+    }
+
+    pub fn get_steps(&self, parent: &StructA) -> u64 {
+        let mut first: u64 = 0;
+        let mut next = self;
+        for step in 0..u64::MAX {
+            next = parent.take_step(next, step as usize);
+            if let Element::End(_) = next {
+                match first {
+                    0 => first = step,
+                    _ => return step - first,
+                }
+            }
+        }
+        u64::MAX
     }
 }
 
@@ -75,26 +90,35 @@ impl StructA {
         Self { steps, maps }
     }
 
-    fn take_step(&self, input: &Element, step_count: usize) -> Option<&Element> {
-        if input == &Element::End {
-            return None;
-        }
+    pub fn take_step(&self, input: &Element, step_count: usize) -> &Element {
         let step = &self.steps[step_count % self.steps.len()];
         match step {
-            Step::L => Some(&self.maps[input].0),
-            Step::R => Some(&self.maps[input].1),
+            Step::L => &self.maps[input].0,
+            Step::R => &self.maps[input].1,
         }
     }
-    pub fn get_output(&self) -> i32 {
-        let step_count = 100000000;
-        let mut current = &Element::Start;
-        for step in 0..100000000 {
-            match self.take_step(current, step as usize) {
-                Some(new) => current = new,
-                None => return step,
-            }
+
+    pub fn get_start(&self) -> Vec<&Element> {
+        self.maps
+            .iter()
+            .filter_map(|f| match f.0 {
+                Element::Start(_) => Some(f.0),
+                _ => None,
+            })
+            .collect_vec()
+    }
+
+    pub fn get_output(&self) -> u64 {
+        let starts = self.get_start();
+        let step_counts = starts
+            .into_iter()
+            .map(|element| element.get_steps(self))
+            .collect_vec();
+        let mut lcm = 1;
+        for step_count in step_counts {
+            lcm = integer::lcm(lcm, step_count);
         }
-        step_count
+        lcm
     }
 }
 
@@ -117,7 +141,7 @@ mod tests {
         let expected = 6;
 
         let struct_a = StructA::new(input_text);
-        println!("{:?}", struct_a);
+        // println!("{:?}", struct_a);
         let actual = struct_a.get_output();
         println!("Got result of {}", actual);
 
