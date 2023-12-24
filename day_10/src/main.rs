@@ -1,5 +1,5 @@
-use day_09::part_one::StructA;
-use day_09::part_two::StructA as StructA2;
+use day_10::part_one::StructA;
+use day_10::part_two::StructA as StructA2;
 use tmx_utils::string_ext;
 
 fn main() {
